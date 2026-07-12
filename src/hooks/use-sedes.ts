@@ -8,7 +8,9 @@ export interface Sede {
   pais: string;
   moneda: string;
   montoLimiteAprobacion: number;
-  estado: string;
+  estado: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export function useGetSedes() {

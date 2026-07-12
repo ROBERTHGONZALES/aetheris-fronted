@@ -130,7 +130,13 @@ export default function Sedes() {
                       <div className="font-medium">{s.nombre}</div>
                       <div className="text-xs text-muted-foreground">{s.pais}</div>
                     </TableCell>
-                    <TableCell><Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">ACTIVA</Badge></TableCell>
+                    <TableCell>
+                      {s.estado ? (
+                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">ACTIVA</Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">INACTIVA</Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right font-mono text-muted-foreground">{s.moneda}</TableCell>
                     <TableCell className="text-right">
                       {editingLimit?.id === s.id ? (
