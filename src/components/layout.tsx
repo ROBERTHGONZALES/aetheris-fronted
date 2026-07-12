@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useUser, useLogout } from "@/hooks/use-auth";
 import { LayoutDashboard, Receipt, CheckSquare, Briefcase, FileSpreadsheet, Building2, ShieldAlert, LogOut, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AriaChat } from "@/components/aria-chat";
 
 const NavItem = ({ href, icon: Icon, children }: { href: string, icon: any, children: React.ReactNode }) => {
   const [location] = useLocation();
@@ -96,11 +97,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
       
       <main className="flex-1 md:pl-64">
-        {/* Top header for mobile could go here, omitting for brevity assuming desktop focus for corporate app */}
         <div className="p-8">
           {children}
         </div>
       </main>
+
+      <AriaChat />
     </div>
   );
 }
