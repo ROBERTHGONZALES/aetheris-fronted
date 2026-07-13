@@ -1,11 +1,13 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiFetch, setAuthToken, setAuthUser, removeAuthToken, removeAuthUser, getAuthUser } from '@/lib/api';
 
+export type Rol = "ADMIN" | "CONTADOR" | "APROBADOR" | "AUDITOR";
+
 export interface AuthResponse {
   token: string;
   sesionId: string;
   usuario: string;
-  rol: "ADMIN" | "CONTADOR" | "APROBADOR" | "AUDITOR";
+  rol: Rol;
 }
 
 export function useLogin() {
@@ -31,5 +33,5 @@ export function useLogout() {
 }
 
 export function useUser() {
-  return getAuthUser() as { usuario: string; rol: "ADMIN" | "CONTADOR" | "APROBADOR" | "AUDITOR"; sesionId: string } | null;
+  return getAuthUser() as { usuario: string; rol: Rol; sesionId: string } | null;
 }

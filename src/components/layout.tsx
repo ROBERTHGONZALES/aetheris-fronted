@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useUser, useLogout } from "@/hooks/use-auth";
-import { LayoutDashboard, Receipt, CheckSquare, Briefcase, FileSpreadsheet, Building2, ShieldAlert, LogOut, Loader2, BotMessageSquare } from "lucide-react";
+import { LayoutDashboard, Receipt, CheckSquare, Briefcase, FileSpreadsheet, Building2, ShieldAlert, LogOut, Loader2, BotMessageSquare, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AriaChat } from "@/components/aria-chat";
 
@@ -30,10 +30,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return <div className="h-screen w-full flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
   }
 
-  const isAuditor = user.rol === "AUDITOR";
   const isAdmin = user.rol === "ADMIN";
+  const isAuditor = user.rol === "AUDITOR" || isAdmin;
   const isAprobador = user.rol === "APROBADOR" || isAdmin;
   const isContador = user.rol === "CONTADOR" || isAdmin;
+  // Transacciones/Presupuesto/Conciliación: ADMIN y CONTADOR administran,
+  // AUDITOR solo consulta (según permisos del backend).
+  const canVerFinanzas = isContador || isAuditor;
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background md:flex-row">
@@ -49,17 +52,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex-1 overflow-auto py-4 flex flex-col gap-1 px-3">
           <NavItem href="/dashboard" icon={LayoutDashboard}>Dashboard</NavItem>
           
-          {(isContador || isAprobador) && (
+          {(canVerFinanzas || isAprobador) && (
             <>
               <div className="mt-4 mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Operaciones</div>
-              <NavItem href="/transacciones" icon={Receipt}>Transacciones</NavItem>
+              {canVerFinanzas && (
+                <NavItem href="/transacciones" icon={Receipt}>Transacciones</NavItem>
+              )}
               {isAprobador && (
                 <NavItem href="/aprobaciones" icon={CheckSquare}>Aprobaciones</NavItem>
               )}
             </>
           )}
 
-          {(isContador || isAdmin) && (
+          {canVerFinanzas && (
             <>
               <div className="mt-4 mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Finanzas</div>
               <NavItem href="/presupuesto" icon={Briefcase}>Presupuesto</NavItem>
@@ -71,7 +76,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <>
               <div className="mt-4 mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Sistema</div>
               {isAdmin && <NavItem href="/sedes" icon={Building2}>Sedes</NavItem>}
-              {(isAdmin || isAuditor) && <NavItem href="/auditoria" icon={ShieldAlert}>Auditoría</NavItem>}
+              {isAdmin && <NavItem href="/usuarios" icon={Users}>Usuarios</NavItem>}
+              {isAuditor && <NavItem href="/auditoria" icon={ShieldAlert}>Auditoría</NavItem>}
             </>
           )}
 

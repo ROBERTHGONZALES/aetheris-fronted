@@ -4,6 +4,8 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { queryClient, getAuthToken } from '@/lib/api';
+import { useUser, type Rol } from '@/hooks/use-auth';
+import { useToast } from '@/hooks/use-toast';
 
 import NotFound from '@/pages/not-found';
 import Login from '@/pages/login';
@@ -14,20 +16,36 @@ import Presupuesto from '@/pages/presupuesto';
 import Conciliacion from '@/pages/conciliacion';
 import Sedes from '@/pages/sedes';
 import Auditoria from '@/pages/auditoria';
+import Usuarios from '@/pages/usuarios';
 import AriaPage from '@/pages/aria';
 
-function ProtectedRoute({ component: Component, path }: { component: any, path: string }) {
+// Debe reflejar los mismos @PreAuthorize del backend (ver SecurityConfig /
+// cada controller). Si cambian los permisos allá, actualizar aquí también.
+function ProtectedRoute({ component: Component, roles }: { component: any, roles?: Rol[] }) {
   const [location, setLocation] = useLocation();
   const token = getAuthToken();
+  const user = useUser();
+  const { toast } = useToast();
+
+  const forbidden = !!token && !!roles && !!user && !roles.includes(user.rol);
 
   useEffect(() => {
     if (!token && location !== '/login') {
       setLocation('/login');
+      return;
     }
-  }, [token, location, setLocation]);
+    if (forbidden) {
+      toast({
+        variant: 'destructive',
+        title: 'Acceso restringido',
+        description: 'Tu rol no tiene permisos para ver esta sección.',
+      });
+      setLocation('/dashboard');
+    }
+  }, [token, location, setLocation, forbidden]);
 
-  if (!token) return null;
-  
+  if (!token || forbidden) return null;
+
   return <Component />;
 }
 
@@ -40,14 +58,15 @@ function Router() {
         useEffect(() => { setLocation('/dashboard') }, []);
         return null;
       }} />
-      <Route path="/dashboard"><ProtectedRoute path="/dashboard" component={Dashboard} /></Route>
-      <Route path="/transacciones"><ProtectedRoute path="/transacciones" component={Transacciones} /></Route>
-      <Route path="/aprobaciones"><ProtectedRoute path="/aprobaciones" component={Aprobaciones} /></Route>
-      <Route path="/presupuesto"><ProtectedRoute path="/presupuesto" component={Presupuesto} /></Route>
-      <Route path="/conciliacion"><ProtectedRoute path="/conciliacion" component={Conciliacion} /></Route>
-      <Route path="/sedes"><ProtectedRoute path="/sedes" component={Sedes} /></Route>
-      <Route path="/auditoria"><ProtectedRoute path="/auditoria" component={Auditoria} /></Route>
-      <Route path="/aria"><ProtectedRoute path="/aria" component={AriaPage} /></Route>
+      <Route path="/dashboard"><ProtectedRoute component={Dashboard} /></Route>
+      <Route path="/transacciones"><ProtectedRoute component={Transacciones} roles={["ADMIN", "CONTADOR", "AUDITOR"]} /></Route>
+      <Route path="/aprobaciones"><ProtectedRoute component={Aprobaciones} roles={["ADMIN", "APROBADOR"]} /></Route>
+      <Route path="/presupuesto"><ProtectedRoute component={Presupuesto} roles={["ADMIN", "CONTADOR", "AUDITOR"]} /></Route>
+      <Route path="/conciliacion"><ProtectedRoute component={Conciliacion} roles={["ADMIN", "CONTADOR", "AUDITOR"]} /></Route>
+      <Route path="/sedes"><ProtectedRoute component={Sedes} roles={["ADMIN"]} /></Route>
+      <Route path="/auditoria"><ProtectedRoute component={Auditoria} roles={["ADMIN", "AUDITOR"]} /></Route>
+      <Route path="/usuarios"><ProtectedRoute component={Usuarios} roles={["ADMIN"]} /></Route>
+      <Route path="/aria"><ProtectedRoute component={AriaPage} /></Route>
       <Route component={NotFound} />
     </Switch>
   );
@@ -55,14 +74,27 @@ function Router() {
 
 function GlobalAuthGuard() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleUnauthorized = () => {
       setLocation('/login');
     };
+    const handleForbidden = (e: Event) => {
+      const detail = (e as CustomEvent<{ message?: string }>).detail;
+      toast({
+        variant: 'destructive',
+        title: 'Acción no permitida',
+        description: detail?.message || 'No tienes permisos para realizar esta acción.',
+      });
+    };
     window.addEventListener('auth-unauthorized', handleUnauthorized);
-    return () => window.removeEventListener('auth-unauthorized', handleUnauthorized);
-  }, [setLocation]);
+    window.addEventListener('auth-forbidden', handleForbidden);
+    return () => {
+      window.removeEventListener('auth-unauthorized', handleUnauthorized);
+      window.removeEventListener('auth-forbidden', handleForbidden);
+    };
+  }, [setLocation, toast]);
 
   return null;
 }

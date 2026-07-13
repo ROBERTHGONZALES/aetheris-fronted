@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout";
 import { useGetPresupuestos, useCreatePresupuesto, useGetPresupuestosEnAlerta } from "@/hooks/use-presupuesto";
 import { useGetSedes } from "@/hooks/use-sedes";
+import { useUser } from "@/hooks/use-auth";
 import { formatCurrency } from "@/lib/utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,10 @@ export default function Presupuesto() {
 
   const createP = useCreatePresupuesto();
   const { toast } = useToast();
+  const user = useUser();
+  // El backend solo permite crear partidas a ADMIN y CONTADOR;
+  // AUDITOR consulta el presupuesto en modo solo lectura.
+  const puedeAsignar = user?.rol === "ADMIN" || user?.rol === "CONTADOR";
 
   const [openCreate, setOpenCreate] = useState(false);
 
@@ -88,6 +93,7 @@ export default function Presupuesto() {
               </SelectContent>
             </Select>
 
+            {puedeAsignar && (
             <Dialog open={openCreate} onOpenChange={setOpenCreate}>
               <DialogTrigger asChild>
                 <Button><Plus className="mr-2 h-4 w-4" /> Asignar Presupuesto</Button>
@@ -157,6 +163,7 @@ export default function Presupuesto() {
                 </Form>
               </DialogContent>
             </Dialog>
+            )}
           </div>
         </div>
 

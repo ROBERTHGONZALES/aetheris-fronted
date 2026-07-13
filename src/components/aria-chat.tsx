@@ -4,6 +4,54 @@ import { useAria, type AriaMessage } from "@/hooks/use-aria";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import "./aria-robot.css";
+
+/* ─── Robot animado (estado inactivo del botón flotante) ────────── */
+function RobotLauncher({ onClick }: { onClick: () => void }) {
+  const [showBubble, setShowBubble] = useState(false);
+
+  useEffect(() => {
+    const showT = setTimeout(() => setShowBubble(true), 1200);
+    const hideT = setTimeout(() => setShowBubble(false), 6000);
+    return () => { clearTimeout(showT); clearTimeout(hideT); };
+  }, []);
+
+  return (
+    <button
+      onClick={() => { setShowBubble(false); onClick(); }}
+      className="ariabot-dock"
+      aria-label="Abrir ARIA"
+    >
+      <div className={cn("ariabot-bubble", showBubble && "ariabot-show")}>
+        ¡Hola! Soy <strong>ARIA</strong> 🤖 ¿Te ayudo con algo?
+      </div>
+      <div className="ariabot-robot">
+        <div className="ariabot-pulse-ring" />
+        <div className="ariabot-antenna" />
+        <div className="ariabot-head-turn">
+          <div className="ariabot-head">
+            <div className="ariabot-ear ariabot-left" />
+            <div className="ariabot-ear ariabot-right" />
+            <div className="ariabot-screen">
+              <div className="ariabot-eyes">
+                <div className="ariabot-eye ariabot-left" />
+                <div className="ariabot-eye ariabot-right" />
+              </div>
+              <div className="ariabot-mouth" />
+            </div>
+          </div>
+        </div>
+        <div className="ariabot-neck" />
+        <div className="ariabot-torso">
+          <div className="ariabot-seam" />
+        </div>
+        <div className="ariabot-arm ariabot-left" />
+        <div className="ariabot-arm ariabot-right" />
+      </div>
+      <div className="ariabot-ground-shadow" />
+    </button>
+  );
+}
 
 /* ─── Welcome suggestions ─────────────────────────────────────── */
 const SUGGESTIONS = [
@@ -60,19 +108,20 @@ export function AriaChat() {
 
   return (
     <>
-      {/* Floating button */}
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className={cn(
-          "fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95",
-          open
-            ? "bg-foreground text-background"
-            : "bg-primary text-primary-foreground hover:bg-primary/90"
-        )}
-        aria-label="Abrir ARIA"
-      >
-        {open ? <X className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
-      </button>
+      {/* Floating button: robot animado cuando está cerrado, botón compacto para cerrar cuando está abierto */}
+      {open ? (
+        <button
+          onClick={() => setOpen(false)}
+          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95"
+          aria-label="Cerrar ARIA"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      ) : (
+        <div className="fixed bottom-6 right-6 z-50">
+          <RobotLauncher onClick={() => setOpen(true)} />
+        </div>
+      )}
 
       {/* Panel */}
       <div

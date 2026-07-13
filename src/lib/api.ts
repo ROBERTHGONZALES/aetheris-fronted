@@ -54,20 +54,27 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
   });
 
   if (!response.ok) {
-    let errorMessage = 'An error occurred';
+    let errorMessage = 'Ocurrió un error inesperado.';
     try {
       const errorData = await response.json();
-      errorMessage = errorData.error || errorData.message || errorMessage;
+      // El backend responde con { error: "Forbidden", mensaje: "texto legible" };
+      // "mensaje" es el texto pensado para mostrarse al usuario.
+      errorMessage = errorData.mensaje || errorData.error || errorData.message || errorMessage;
     } catch (e) {
       errorMessage = response.statusText;
     }
-    
+
     if (response.status === 401) {
       removeAuthToken();
       removeAuthUser();
       window.dispatchEvent(new Event('auth-unauthorized'));
     }
-    
+
+    if (response.status === 403) {
+      errorMessage = errorMessage || 'No tienes permisos para acceder a este recurso.';
+      window.dispatchEvent(new CustomEvent('auth-forbidden', { detail: { message: errorMessage } }));
+    }
+
     throw new ApiError(errorMessage, response.status);
   }
 

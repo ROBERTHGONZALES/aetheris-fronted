@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout";
 import { useGetTransacciones, useCreateTransaccion } from "@/hooks/use-transacciones";
 import { useGetSedes } from "@/hooks/use-sedes";
+import { useUser } from "@/hooks/use-auth";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +33,10 @@ export default function Transacciones() {
   const createTx = useCreateTransaccion();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const user = useUser();
+  // El backend solo permite registrar transacciones a ADMIN y CONTADOR;
+  // el resto (AUDITOR) tiene acceso de solo lectura a esta pantalla.
+  const puedeRegistrar = user?.rol === "ADMIN" || user?.rol === "CONTADOR";
 
   const form = useForm<z.infer<typeof createTxSchema>>({
     resolver: zodResolver(createTxSchema),
@@ -68,6 +73,7 @@ export default function Transacciones() {
             <p className="text-muted-foreground mt-1">Registro central de ingresos y egresos.</p>
           </div>
           
+          {puedeRegistrar && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button><Plus className="mr-2 h-4 w-4" /> Nueva Transacción</Button>
@@ -193,6 +199,7 @@ export default function Transacciones() {
               </Form>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
         <div className="bg-card border rounded-lg overflow-hidden shadow-sm">

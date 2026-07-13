@@ -1,12 +1,14 @@
 import { AppLayout } from "@/components/layout";
 import { useIniciarConciliacion, useImportarMovimientos, useCruzarConciliacion } from "@/hooks/use-conciliacion";
+import { useUser } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { FileSpreadsheet, Loader2, Upload, PlayCircle } from "lucide-react";
+import { FileSpreadsheet, Loader2, Upload, PlayCircle, Eye } from "lucide-react";
 
 export default function Conciliacion() {
   const [cuentaId, setCuentaId] = useState("");
@@ -18,6 +20,10 @@ export default function Conciliacion() {
   const importar = useImportarMovimientos();
   const cruzar = useCruzarConciliacion();
   const { toast } = useToast();
+  const user = useUser();
+  // El backend solo permite iniciar/importar/cruzar a ADMIN y CONTADOR;
+  // AUDITOR consulta la conciliación en modo solo lectura.
+  const puedeGestionar = user?.rol === "ADMIN" || user?.rol === "CONTADOR";
 
   const handleIniciar = () => {
     if (!cuentaId || !periodo) return;
@@ -63,9 +69,16 @@ export default function Conciliacion() {
   return (
     <AppLayout>
       <div className="flex flex-col gap-6 max-w-4xl">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Conciliación Bancaria</h1>
-          <p className="text-muted-foreground mt-1">Cruce automático de extractos bancarios con libros contables.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Conciliación Bancaria</h1>
+            <p className="text-muted-foreground mt-1">Cruce automático de extractos bancarios con libros contables.</p>
+          </div>
+          {!puedeGestionar && (
+            <Badge variant="outline" className="flex items-center gap-1 text-muted-foreground">
+              <Eye className="h-3 w-3" /> Solo lectura
+            </Badge>
+          )}
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
@@ -77,13 +90,13 @@ export default function Conciliacion() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>ID Cuenta Bancaria</Label>
-                <Input value={cuentaId} onChange={e => setCuentaId(e.target.value)} disabled={!!conciliacionId} placeholder="Ej. ACC-1234" />
+                <Input value={cuentaId} onChange={e => setCuentaId(e.target.value)} disabled={!puedeGestionar || !!conciliacionId} placeholder="Ej. ACC-1234" />
               </div>
               <div className="space-y-2">
                 <Label>Periodo (YYYY-MM)</Label>
-                <Input type="month" value={periodo} onChange={e => setPeriodo(e.target.value)} disabled={!!conciliacionId} />
+                <Input type="month" value={periodo} onChange={e => setPeriodo(e.target.value)} disabled={!puedeGestionar || !!conciliacionId} />
               </div>
-              <Button className="w-full" onClick={handleIniciar} disabled={!cuentaId || !periodo || !!conciliacionId || iniciar.isPending}>
+              <Button className="w-full" onClick={handleIniciar} disabled={!puedeGestionar || !cuentaId || !periodo || !!conciliacionId || iniciar.isPending}>
                 {iniciar.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Crear Sesión
               </Button>
@@ -106,7 +119,7 @@ export default function Conciliacion() {
                 value={fileContent}
                 onChange={e => setFileContent(e.target.value)}
               />
-              <Button variant="secondary" className="w-full" onClick={handleImportar} disabled={!fileContent || importar.isPending}>
+              <Button variant="secondary" className="w-full" onClick={handleImportar} disabled={!puedeGestionar || !fileContent || importar.isPending}>
                 <Upload className="mr-2 h-4 w-4" /> Importar Movimientos
               </Button>
             </CardContent>
@@ -121,7 +134,7 @@ export default function Conciliacion() {
               <div className="text-center mb-4 text-sm text-muted-foreground">
                 El sistema buscará coincidencias exactas por monto y aproximadas por fecha/referencia.
               </div>
-              <Button size="lg" className="w-full font-bold bg-indigo-600 hover:bg-indigo-700 text-white" onClick={handleCruzar} disabled={cruzar.isPending}>
+              <Button size="lg" className="w-full font-bold bg-indigo-600 hover:bg-indigo-700 text-white" onClick={handleCruzar} disabled={!puedeGestionar || cruzar.isPending}>
                 {cruzar.isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <PlayCircle className="mr-2 h-5 w-5" />}
                 Ejecutar Cruce
               </Button>

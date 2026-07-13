@@ -1,0 +1,247 @@
+/* Robot animado para el botón flotante de ARIA (estado inactivo/cerrado). */
+.ariabot-dock {
+  --ariabot-shell-1: #ffffff;
+  --ariabot-shell-2: #e4e8ee;
+  --ariabot-shell-3: #c7cedb;
+  --ariabot-screen-1: #12202e;
+  --ariabot-screen-2: #0a1420;
+  --ariabot-glow: #3fe4e0;
+  --ariabot-glow-soft: #8bf3f0;
+  --ariabot-shadow: rgba(0, 0, 0, 0.22);
+
+  position: relative;
+  width: 88px;
+  height: 120px;
+  cursor: pointer;
+  filter: drop-shadow(0 12px 16px var(--ariabot-shadow));
+  perspective: 600px;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.ariabot-robot {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: ariabot-float 5s ease-in-out infinite;
+}
+@keyframes ariabot-float {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  12% { transform: translate(-13px, 8px) rotate(-6deg); }
+  25% { transform: translate(-18px, -13px) rotate(-4deg); }
+  37% { transform: translate(-8px, -21px) rotate(0deg); }
+  50% { transform: translate(0, -24px) rotate(2deg); }
+  62% { transform: translate(10px, -19px) rotate(4deg); }
+  75% { transform: translate(16px, -8px) rotate(6deg); }
+  87% { transform: translate(11px, 6px) rotate(3deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.ariabot-antenna {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 13px;
+  height: 13px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fff, var(--ariabot-shell-2) 60%, var(--ariabot-shell-3));
+  box-shadow: 0 2px 4px var(--ariabot-shadow);
+  z-index: 2;
+  animation: ariabot-antennabob 5s ease-in-out infinite;
+}
+@keyframes ariabot-antennabob {
+  0%, 100% { transform: translateX(-50%) rotate(0deg); }
+  50% { transform: translateX(-50%) rotate(10deg); }
+}
+
+.ariabot-head-turn {
+  position: absolute;
+  top: 0;
+  left: 10px;
+  right: 10px;
+  height: 62px;
+  transform-style: preserve-3d;
+  animation: ariabot-headturn 4.8s ease-in-out infinite;
+}
+@keyframes ariabot-headturn {
+  0%, 8% { transform: rotateY(0deg); }
+  22%, 30% { transform: rotateY(-26deg); }
+  44% { transform: rotateY(0deg); }
+  58%, 66% { transform: rotateY(24deg); }
+  80% { transform: rotateY(0deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+.ariabot-head {
+  position: absolute;
+  inset: 0;
+  border-radius: 27px 27px 24px 24px;
+  background: linear-gradient(155deg, #ffffff 0%, var(--ariabot-shell-2) 55%, var(--ariabot-shell-3) 100%);
+  box-shadow: inset 0 -6px 10px rgba(0, 0, 0, 0.06), inset 0 3px 4px #fff;
+}
+.ariabot-ear {
+  position: absolute;
+  top: 16px;
+  width: 8px;
+  height: 21px;
+  border-radius: 6px;
+  background: linear-gradient(160deg, #fff, var(--ariabot-shell-3));
+}
+.ariabot-ear.ariabot-left { left: -5px; }
+.ariabot-ear.ariabot-right { right: -5px; }
+
+.ariabot-screen {
+  position: absolute;
+  top: 10px;
+  left: 7px;
+  right: 7px;
+  bottom: 8px;
+  border-radius: 18px;
+  background: radial-gradient(120% 130% at 50% 20%, var(--ariabot-screen-1), var(--ariabot-screen-2) 75%);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  overflow: hidden;
+}
+.ariabot-eyes { display: flex; gap: 11px; }
+.ariabot-eye {
+  width: 9px;
+  height: 13px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: var(--ariabot-glow-soft);
+  box-shadow: 0 0 8px 2px var(--ariabot-glow), 0 0 2px #fff;
+  animation: ariabot-blink 4.2s ease-in-out infinite;
+}
+.ariabot-eye.ariabot-right { animation-delay: 0.15s; }
+@keyframes ariabot-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+.ariabot-mouth {
+  width: 13px;
+  height: 6px;
+  border-radius: 0 0 13px 13px;
+  background: var(--ariabot-glow-soft);
+  box-shadow: 0 0 8px 1px var(--ariabot-glow);
+}
+
+.ariabot-neck {
+  position: absolute;
+  top: 58px;
+  left: 50%;
+  width: 21px;
+  height: 10px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, var(--ariabot-shell-3), var(--ariabot-shell-2));
+  border-radius: 3px;
+}
+
+.ariabot-torso {
+  position: absolute;
+  top: 64px;
+  left: 14px;
+  right: 14px;
+  bottom: 0;
+  border-radius: 46% 46% 50% 50% / 55% 55% 45% 45%;
+  background: linear-gradient(160deg, #ffffff 0%, var(--ariabot-shell-2) 55%, var(--ariabot-shell-3) 100%);
+  box-shadow: inset 0 -8px 12px rgba(0, 0, 0, 0.07), inset 0 4px 5px #fff;
+}
+.ariabot-seam {
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  top: 46%;
+  height: 2px;
+  background: var(--ariabot-shell-3);
+  opacity: 0.7;
+}
+
+.ariabot-arm {
+  position: absolute;
+  top: 72px;
+  width: 16px;
+  height: 50px;
+  border-radius: 13px;
+  background: linear-gradient(160deg, #fff, var(--ariabot-shell-2) 60%, var(--ariabot-shell-3));
+  box-shadow: inset 0 3px 4px #fff, inset 0 -4px 6px rgba(0, 0, 0, 0.06);
+  transform-origin: top center;
+}
+.ariabot-arm.ariabot-left { left: -5px; animation: ariabot-swingLeft 5s ease-in-out infinite; }
+.ariabot-arm.ariabot-right { right: -5px; animation: ariabot-swingRight 5s ease-in-out infinite; }
+@keyframes ariabot-swingLeft {
+  0%, 100% { transform: rotate(6deg); }
+  50% { transform: rotate(16deg); }
+}
+@keyframes ariabot-swingRight {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(-16deg); }
+}
+
+.ariabot-ground-shadow {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  width: 54px;
+  height: 11px;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.18), transparent 75%);
+  animation: ariabot-shadowpulse 5s ease-in-out infinite;
+}
+@keyframes ariabot-shadowpulse {
+  0% { transform: translate(-50%, 0) scale(1, 1); opacity: 1; }
+  12% { transform: translate(calc(-50% - 11px), 0) scale(0.92, 0.95); opacity: 0.85; }
+  25% { transform: translate(calc(-50% - 14px), 0) scale(0.75, 0.85); opacity: 0.6; }
+  50% { transform: translate(-50%, 0) scale(0.62, 0.75); opacity: 0.4; }
+  75% { transform: translate(calc(-50% + 13px), 0) scale(0.8, 0.88); opacity: 0.65; }
+  87% { transform: translate(calc(-50% + 9px), 0) scale(0.95, 0.97); opacity: 0.9; }
+  100% { transform: translate(-50%, 0) scale(1, 1); opacity: 1; }
+}
+
+.ariabot-pulse-ring {
+  position: absolute;
+  top: 6px;
+  right: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #28c76f;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 0 rgba(40, 199, 111, 0.6);
+  animation: ariabot-pulse 2s infinite;
+  z-index: 3;
+}
+@keyframes ariabot-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(40, 199, 111, 0.6); }
+  70% { box-shadow: 0 0 0 8px rgba(40, 199, 111, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(40, 199, 111, 0); }
+}
+
+/* Globo de saludo que aparece brevemente sobre el robot */
+.ariabot-bubble {
+  position: absolute;
+  bottom: 128px;
+  right: 0;
+  max-width: 190px;
+  background: #fff;
+  border-radius: 14px 14px 4px 14px;
+  padding: 9px 12px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: #26313f;
+  box-shadow: 0 10px 30px var(--ariabot-shadow, rgba(0, 0, 0, 0.22));
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+  white-space: normal;
+}
+.ariabot-bubble.ariabot-show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.ariabot-bubble strong { color: #0d7d79; }
