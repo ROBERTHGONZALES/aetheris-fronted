@@ -24,6 +24,19 @@ const createPresupuestoSchema = z.object({
   categoria: z.object({ id: z.string().min(1, "Categoría requerida") })
 });
 
+// El backend no expone un endpoint para listar categorías contables, así que
+// no hay forma de descubrir sus IDs reales desde el frontend. Estos son los
+// IDs sembrados que existen en la base de datos (verificados manualmente);
+// si el backend llega a exponer GET /api/categorias, esto debería reemplazarse
+// por esa lista real en vez de estar hardcodeado.
+const CATEGORIAS_CONOCIDAS = [
+  { id: "40000000-0000-0000-0000-000000000001", nombre: "Categoría 1" },
+  { id: "40000000-0000-0000-0000-000000000002", nombre: "Categoría 2" },
+  { id: "40000000-0000-0000-0000-000000000003", nombre: "Categoría 3" },
+  { id: "40000000-0000-0000-0000-000000000004", nombre: "Categoría 4" },
+  { id: "40000000-0000-0000-0000-000000000005", nombre: "Categoría 5" },
+];
+
 export default function Presupuesto() {
   const currentPeriod = format(new Date(), "yyyy-MM");
   const { data: sedes } = useGetSedes();
@@ -50,7 +63,7 @@ export default function Presupuesto() {
       periodo: currentPeriod,
       montoPresupuestado: 0,
       sede: { id: "" },
-      categoria: { id: "" } // Usually categories would come from API, assuming ID for now
+      categoria: { id: "" }
     }
   });
 
@@ -87,7 +100,14 @@ export default function Presupuesto() {
                 
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(v => createP.mutate(v, {
-                    onSuccess: () => { toast({title: "Asignado"}); setOpenCreate(false); form.reset(); }
+                    onSuccess: () => { toast({title: "Asignado"}); setOpenCreate(false); form.reset(); },
+                    onError: (err: any) => {
+                      toast({
+                        title: "No se pudo asignar el presupuesto",
+                        description: err?.message ?? "Ocurrió un error inesperado. Intenta de nuevo.",
+                        variant: "destructive",
+                      });
+                    }
                   }))} className="space-y-4">
                     <FormField
                       control={form.control}
@@ -116,12 +136,18 @@ export default function Presupuesto() {
                         </FormItem>
                       )}
                     />
-                    {/* Simplified category for now, assuming user types ID or we hardcode a selection if no endpoint provided */}
+                    {/* El backend no expone un listado de categorías; usamos las IDs sembradas conocidas. */}
                     <FormField
                       control={form.control}
                       name="categoria.id"
                       render={({ field }) => (
-                        <FormItem><FormLabel>Categoría (ID / Nombre)</FormLabel><FormControl><Input {...field} placeholder="Ej. Operaciones" /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Categoría</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger></FormControl>
+                            <SelectContent>{CATEGORIAS_CONOCIDAS.map(c => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}</SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                     <Button type="submit" className="w-full" disabled={createP.isPending}>

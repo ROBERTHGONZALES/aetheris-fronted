@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { getAuthToken } from "@/lib/api";
+import { getAuthToken, BACKEND_URL } from "@/lib/api";
 
 export interface AriaMessage {
   id: string;
@@ -61,7 +61,7 @@ export function useAria() {
           messages.concat() // current messages (before state update settles)
         );
 
-        const res = await fetch("/api/aria/chat", {
+        const res = await fetch(`${BACKEND_URL}/api/aria/chat`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

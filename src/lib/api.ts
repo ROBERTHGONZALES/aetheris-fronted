@@ -1,5 +1,12 @@
 import { QueryClient } from '@tanstack/react-query';
 
+// The Aetheris backend (Spring Boot on Railway) is a separate, already-deployed
+// service — it is not part of this workspace. CORS on the backend allows
+// *.replit.dev / *.repl.co origins, so the browser can call it directly.
+export const BACKEND_URL =
+  import.meta.env.VITE_BACKEND_URL ??
+  'https://aetheris-production-3f46.up.railway.app';
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -39,7 +46,9 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(endpoint, {
+  const url = endpoint.startsWith('/api') ? `${BACKEND_URL}${endpoint}` : endpoint;
+
+  const response = await fetch(url, {
     ...options,
     headers,
   });
