@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import { Bot, X, Send, Square, Trash2, ChevronDown, Loader2, Wrench, AlertCircle } from "lucide-react";
 import { useAria, type AriaMessage } from "@/hooks/use-aria";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 /* ─── Welcome suggestions ─────────────────────────────────────── */
 const SUGGESTIONS = [
@@ -237,7 +239,39 @@ function MessageBubble({ msg }: { msg: AriaMessage }) {
                 <span className="text-xs font-medium">Error</span>
               </div>
             )}
-            <span className="whitespace-pre-wrap">{msg.text}</span>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-2">
+                    <table className="w-full text-xs border-collapse">{children}</table>
+                  </div>
+                ),
+                thead: ({ children }) => (
+                  <thead className="bg-muted-foreground/10">{children}</thead>
+                ),
+                th: ({ children }) => (
+                  <th className="border border-border/50 px-2 py-1 text-left font-semibold">{children}</th>
+                ),
+                td: ({ children }) => (
+                  <td className="border border-border/50 px-2 py-1">{children}</td>
+                ),
+                strong: ({ children }) => (
+                  <strong className="font-semibold">{children}</strong>
+                ),
+                ul: ({ children }) => (
+                  <ul className="list-disc list-inside space-y-0.5 my-1">{children}</ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="list-decimal list-inside space-y-0.5 my-1">{children}</ol>
+                ),
+                p: ({ children }) => (
+                  <p className="mb-1 last:mb-0">{children}</p>
+                ),
+              }}
+            >
+              {msg.text}
+            </ReactMarkdown>
             {msg.streaming && !msg.text && (
               <span className="flex items-center gap-1.5 text-muted-foreground">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />

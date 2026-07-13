@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useUser, useLogout } from "@/hooks/use-auth";
-import { LayoutDashboard, Receipt, CheckSquare, Briefcase, FileSpreadsheet, Building2, ShieldAlert, LogOut, Loader2 } from "lucide-react";
+import { LayoutDashboard, Receipt, CheckSquare, Briefcase, FileSpreadsheet, Building2, ShieldAlert, LogOut, Loader2, BotMessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AriaChat } from "@/components/aria-chat";
 
@@ -74,6 +74,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               {(isAdmin || isAuditor) && <NavItem href="/auditoria" icon={ShieldAlert}>Auditoría</NavItem>}
             </>
           )}
+
+          <div className="mt-4 mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">Inteligencia</div>
+          <NavItem href="/aria" icon={BotMessageSquare}>ARIA — Chat IA</NavItem>
         </div>
         
         <div className="mt-auto p-4 border-t border-sidebar-border">

@@ -14,6 +14,7 @@ import Presupuesto from '@/pages/presupuesto';
 import Conciliacion from '@/pages/conciliacion';
 import Sedes from '@/pages/sedes';
 import Auditoria from '@/pages/auditoria';
+import AriaPage from '@/pages/aria';
 
 function ProtectedRoute({ component: Component, path }: { component: any, path: string }) {
   const [location, setLocation] = useLocation();
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/conciliacion"><ProtectedRoute path="/conciliacion" component={Conciliacion} /></Route>
       <Route path="/sedes"><ProtectedRoute path="/sedes" component={Sedes} /></Route>
       <Route path="/auditoria"><ProtectedRoute path="/auditoria" component={Auditoria} /></Route>
+      <Route path="/aria"><ProtectedRoute path="/aria" component={AriaPage} /></Route>
       <Route component={NotFound} />
     </Switch>
   );
