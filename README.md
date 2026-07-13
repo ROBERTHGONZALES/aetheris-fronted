@@ -135,67 +135,6 @@ Navegador  →  /api/*  →  Proxy Express (Replit)  →  Railway (Spring Boot)
 
 ---
 
-## 🚀 Instalación local
-
-### Prerrequisitos
-
-- Node.js 20+
-- npm 10+
-
-### 1. Clonar
-
-```bash
-git clone https://github.com/ROBERTHGONZALES/aetheris-fronted.git
-cd aetheris-fronted
-```
-
-### 2. Instalar dependencias
-
-```bash
-npm install
-```
-
-### 3. Variables de entorno
-
-Crea un archivo `.env.local` (opcional; ya trae un valor por defecto):
-
-```env
-VITE_BACKEND_URL=https://aetheris-production-3f46.up.railway.app
-```
-
-> `VITE_BACKEND_URL` se usa tanto en desarrollo (proxy de Vite en `/api`) como en producción (se incrusta en el bundle al hacer `build`, así que debe estar definida como variable de **build** en el proveedor de hosting).
-
-### 4. Ejecutar en desarrollo
-
-```bash
-npm run dev
-```
-
-La app queda disponible en `http://localhost:5173`.
-
----
-
-## ⚙️ Variables de entorno
-
-| Variable | Default | Descripción |
-|---|---|---|
-| `VITE_BACKEND_URL` | `https://aetheris-production-3f46.up.railway.app` | URL base del backend Spring Boot. Se incrusta en el bundle al compilar. |
-| `PORT` | `4173` | Puerto en el que `npm start` sirve el build de producción (Railway la asigna automáticamente). |
-
----
-
-## 🚂 Deploy en Railway
-
-Este repo ya está listo para desplegarse en Railway sin configuración adicional (`railway.json` incluido):
-
-1. En Railway: **New Project → Deploy from GitHub repo** y selecciona `aetheris-fronted`.
-2. En **Variables**, agrega `VITE_BACKEND_URL` con la URL del backend (marca la opción de que esté disponible durante el **build**, ya que Vite la incrusta en el bundle en tiempo de compilación, no en runtime).
-3. Railway detecta el proyecto Node automáticamente (Nixpacks) y ejecuta:
-   - Build: `npm install && npm run build`
-   - Start: `npm run start` → sirve `dist/` como sitio estático con soporte de rutas SPA, en el puerto que Railway asigna vía `PORT`.
-4. Publica. Railway te da un dominio `*.up.railway.app` (o puedes conectar un dominio propio).
-
----
 
 ## 📁 Estructura del proyecto
 
@@ -231,16 +170,6 @@ src/
 
 ---
 
-## 🤝 Contribuir
 
-1. Fork del repositorio
-2. Crea tu rama: `git checkout -b feature/nueva-funcionalidad`
-3. Commit: `git commit -m 'feat: descripción corta'`
-4. Push: `git push origin feature/nueva-funcionalidad`
-5. Abre un **Pull Request** hacia `main`
-
----
-
-## 📜 Licencia
 
 MIT © [ROBERTHGONZALES](https://github.com/ROBERTHGONZALES)
