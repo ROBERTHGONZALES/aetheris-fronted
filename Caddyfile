@@ -1,0 +1,14 @@
+:{$PORT:4173}
+
+encode gzip
+
+# Proxy /api/* server-to-server — evita CORS de Spring Security
+reverse_proxy /api/* https://aetheris-production-3f46.up.railway.app {
+    header_up Host aetheris-production-3f46.up.railway.app
+    header_up -Origin
+}
+
+# Servir el SPA de React
+root * /app/dist
+try_files {path} /index.html
+file_server
