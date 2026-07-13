@@ -50,7 +50,7 @@ El portal incluye un chatbot flotante **ARIA** accesible desde cualquier pantall
 | Routing | Wouter |
 | HTTP | Fetch API nativa |
 | Chatbot SSE | `EventSource` / `ReadableStream` |
-| Deploy | Replit (monorepo pnpm) |
+| Deploy | Railway (Nixpacks + `serve`) |
 
 ---
 
@@ -140,7 +140,7 @@ Navegador  →  /api/*  →  Proxy Express (Replit)  →  Railway (Spring Boot)
 ### Prerrequisitos
 
 - Node.js 20+
-- pnpm 9+
+- npm 10+
 
 ### 1. Clonar
 
@@ -152,23 +152,23 @@ cd aetheris-fronted
 ### 2. Instalar dependencias
 
 ```bash
-pnpm install
+npm install
 ```
 
 ### 3. Variables de entorno
 
-Crea un archivo `.env.local`:
+Crea un archivo `.env.local` (opcional; ya trae un valor por defecto):
 
 ```env
-VITE_API_BASE_URL=https://aetheris-production-3f46.up.railway.app
+VITE_BACKEND_URL=https://aetheris-production-3f46.up.railway.app
 ```
 
-> En Replit el proxy interno se encarga del routing; esta variable solo es necesaria para desarrollo local sin el proxy.
+> `VITE_BACKEND_URL` se usa tanto en desarrollo (proxy de Vite en `/api`) como en producción (se incrusta en el bundle al hacer `build`, así que debe estar definida como variable de **build** en el proveedor de hosting).
 
-### 4. Ejecutar
+### 4. Ejecutar en desarrollo
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 La app queda disponible en `http://localhost:5173`.
@@ -179,7 +179,21 @@ La app queda disponible en `http://localhost:5173`.
 
 | Variable | Default | Descripción |
 |---|---|---|
-| `VITE_API_BASE_URL` | *(proxy interno)* | URL base del backend para desarrollo local |
+| `VITE_BACKEND_URL` | `https://aetheris-production-3f46.up.railway.app` | URL base del backend Spring Boot. Se incrusta en el bundle al compilar. |
+| `PORT` | `4173` | Puerto en el que `npm start` sirve el build de producción (Railway la asigna automáticamente). |
+
+---
+
+## 🚂 Deploy en Railway
+
+Este repo ya está listo para desplegarse en Railway sin configuración adicional (`railway.json` incluido):
+
+1. En Railway: **New Project → Deploy from GitHub repo** y selecciona `aetheris-fronted`.
+2. En **Variables**, agrega `VITE_BACKEND_URL` con la URL del backend (marca la opción de que esté disponible durante el **build**, ya que Vite la incrusta en el bundle en tiempo de compilación, no en runtime).
+3. Railway detecta el proyecto Node automáticamente (Nixpacks) y ejecuta:
+   - Build: `npm install && npm run build`
+   - Start: `npm run start` → sirve `dist/` como sitio estático con soporte de rutas SPA, en el puerto que Railway asigna vía `PORT`.
+4. Publica. Railway te da un dominio `*.up.railway.app` (o puedes conectar un dominio propio).
 
 ---
 
