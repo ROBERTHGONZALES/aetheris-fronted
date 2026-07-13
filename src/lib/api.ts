@@ -1,11 +1,12 @@
 import { QueryClient } from '@tanstack/react-query';
 
-// The Aetheris backend (Spring Boot on Railway) is a separate, already-deployed
-// service — it is not part of this workspace. CORS on the backend allows
-// *.replit.dev / *.repl.co origins, so the browser can call it directly.
-export const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL ??
-  'https://aetheris-production-3f46.up.railway.app';
+// En producción (build de Vite) se usan URLs relativas para que el proxy Caddy
+// enrute /api/* hacia el backend sin restricciones CORS.
+// En desarrollo el Vite dev-server hace el mismo proxy, pero ARIA llama con URL
+// absoluta, por lo que seguimos usando la URL completa del backend en dev.
+export const BACKEND_URL = import.meta.env.PROD
+  ? ''
+  : (import.meta.env.VITE_BACKEND_URL ?? 'https://aetheris-production-3f46.up.railway.app');
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,8 +58,6 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
     let errorMessage = 'Ocurrió un error inesperado.';
     try {
       const errorData = await response.json();
-      // El backend responde con { error: "Forbidden", mensaje: "texto legible" };
-      // "mensaje" es el texto pensado para mostrarse al usuario.
       errorMessage = errorData.mensaje || errorData.error || errorData.message || errorMessage;
     } catch (e) {
       errorMessage = response.statusText;
@@ -78,11 +77,10 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
     throw new ApiError(errorMessage, response.status);
   }
 
-  // Handle empty responses
   if (response.status === 204) return {} as T;
-  
+
   const text = await response.text();
   if (!text) return {} as T;
-  
+
   return JSON.parse(text) as T;
 }
