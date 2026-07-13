@@ -4,15 +4,22 @@ import { useGetTransaccionesPeriodo } from "@/hooks/use-transacciones";
 import { useGetAprobacionesPendientes } from "@/hooks/use-aprobaciones";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { ArrowDownRight, ArrowUpRight, CheckCircle2, Clock, Wallet } from "lucide-react";
-import { startOfMonth, endOfMonth, format } from "date-fns";
+import { startOfMonth, endOfMonth, format, parse } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function Dashboard() {
-  const [dateRange] = useState({
-    inicio: format(startOfMonth(new Date()), "yyyy-MM-dd"),
-    fin: format(endOfMonth(new Date()), "yyyy-MM-dd"),
-  });
+  // El dashboard muestra el mes seleccionado, no siempre "hoy" -- si el mes
+  // actual no tiene movimientos (por ejemplo datos de prueba de otro periodo),
+  // los totales en 0 son correctos para ESE mes, así que dejamos que el
+  // usuario elija qué mes revisar en vez de esconder un selector fijo.
+  const [mes, setMes] = useState(format(new Date(), "yyyy-MM"));
+  const mesInicio = startOfMonth(parse(mes, "yyyy-MM", new Date()));
+  const dateRange = {
+    inicio: format(mesInicio, "yyyy-MM-dd"),
+    fin: format(endOfMonth(mesInicio), "yyyy-MM-dd"),
+  };
 
   const { data: transacciones, isLoading: txLoading, isError: txError } = useGetTransaccionesPeriodo(dateRange.inicio, dateRange.fin);
   const { data: pendientes, isLoading: penLoading, isError: penError } = useGetAprobacionesPendientes();
@@ -32,7 +39,7 @@ export default function Dashboard() {
       title: "Balance Total Aprobado",
       value: formatCurrency(balance),
       icon: Wallet,
-      description: "Ingresos - Egresos (Mes actual)",
+      description: "Ingresos - Egresos (mes seleccionado)",
       color: balance >= 0 ? "text-emerald-500" : "text-destructive",
     },
     {
@@ -61,10 +68,22 @@ export default function Dashboard() {
   return (
     <AppLayout>
       <div className="flex flex-col gap-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Resumen financiero consolidado del periodo actual.</p>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Resumen financiero consolidado del mes seleccionado.</p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="dashboard-mes" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Mes</label>
+            <Input id="dashboard-mes" type="month" value={mes} onChange={(e) => setMes(e.target.value)} className="w-40" />
+          </div>
         </div>
+
+        {!txLoading && !txError && (!transacciones || transacciones.length === 0) && (
+          <div className="bg-muted/50 border border-border rounded-lg p-4 text-sm text-muted-foreground">
+            No hay transacciones registradas en {format(mesInicio, "MMMM yyyy")}. Elige otro mes para ver movimientos existentes.
+          </div>
+        )}
 
         {hasError && (
           <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 text-sm text-destructive">
@@ -136,7 +155,7 @@ export default function Dashboard() {
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm font-medium leading-none max-w-[150px] truncate">{t.descripcion}</p>
-                          <p className="text-xs text-muted-foreground">{t.sede.nombre}</p>
+                          <p className="text-xs text-muted-foreground">{t.sede?.nombre ?? "Sede no disponible"}</p>
                         </div>
                       </div>
                       <div className={`text-sm font-bold ${t.tipo === 'INGRESO' ? 'text-emerald-500' : 'text-foreground'}`}>
